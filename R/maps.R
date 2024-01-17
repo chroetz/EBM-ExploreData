@@ -58,6 +58,8 @@ createMaps <- function(
   cat("Process batch", batchIndex, "with", length(batch), dataTimeName, "values.\n")
 
   for (dataTimeValue in batch) {
+    cat("processing", dataTimeName, dataTimeValue, "... ")
+    pt <- proc.time()[3]
 
     title <- paste(dataVariableName, dataTimeValue, sep = "_")
 
@@ -77,13 +79,10 @@ createMaps <- function(
         scale_fill_viridis_c(option = "C", limits = range(data[[dataVariableName]])) +
         theme(legend.position="bottom")
 
-    cat("creating and saving plot", title, "... ")
-    pt <- proc.time()[3]
     ggplot2::ggsave(
       file.path(outDir, paste0(title, ".png")),
       plot = plt,
       width = widthInPx, height = heightInPx, units = "px", dpi = dpi)
     cat(" done after", proc.time()[3] - pt, "s\n")
   }
-
 }
