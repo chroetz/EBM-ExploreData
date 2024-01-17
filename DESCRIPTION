@@ -12,6 +12,8 @@ RoxygenNote: 7.2.3
 Imports: 
     ConfigOpts,
     dplyr,
+    EbmUtility,
     ggplot2,
     readr,
+    rlang,
     sf

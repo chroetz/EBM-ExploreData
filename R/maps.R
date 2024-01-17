@@ -1,54 +1,89 @@
+#' @export
 createMaps <- function(
-  year,
-  variable,
-  outDir,
   dataFilePath,
-  shapefilePath,
-  sfRegionName = "GID_1",
-  variableRegionName = "GID_1",
-  transformation = \(x) log10(x+1)
+  dataVariableName,
+  dataRegionName = "GID_1",
+  dataTimeName = "year",
+  variableTransformationText = NULL,
+  shapeFilePath,
+  shapeRegionName = "GID_1",
+  outDir,
+  widthinPx = 1920,
+  heightinPx = 1080,
+  dpi = 150,
+  nBatches = 1,
+  batchIndex = 1,
+  timeFilter = NULL,
+  regionFilter = NULL
 ) {
 
-  data <-
-    read_csv(dataFilePath, col_types = cols()) |>
-    mutate(across(all_of(variable), transformation))
+  data <- read_csv(dataFilePath, col_types = cols())
+  if (!is.null(timeFilter)) {
+    data <- filter(data, .data[[dataTimeName]] %in% timeFilter)
+  }
+  if (!is.null(regionFilter)) {
+    data <- filter(data, .data[[dataRegionName]] %in% regionFilter)
+  }
+
+  if (length(variableTransformationText) > 0) {
+    transformation <- eval(parse(text = variableTransformationText))
+    data <-
+      data |>
+      mutate(across(all_of(dataVariableName), transformation))
+  }
 
   cat("read geodata file...")
   pt <- proc.time()[3]
-  sf <-
-    shapefilePath |>
+  shape <-
+    shapeFilePath |>
     read_sf() |>
-    select(all_of(sfRegionName), geom)
+    select(all_of(shapeRegionName), .data$geom)
+  if (!is.null(regionFilter)) {
+    shape <- filter(shape, .data[[shapeRegionName]] %in% regionFilter)
+  }
   cat(" done after", proc.time()[3] - pt, "s\n")
-
-  title <- paste(variable, year, sep = "_")
-
-  dataWithShape <-
-    sf |>
-    left_join(
-      data |>
-        filter(.data$year == .env$year) |>
-        select(all_of(variableRegionName), all_of(variable)),
-      join_by(!!sfRegionName == !!variableRegionName))
-
-  plt <-
-    dataWithShape |>
-    ggplot(aes(geometry = geom, fill = .data[[variable]])) +
-      geom_sf() +
-      ggtitle(title) +
-      scale_fill_viridis_c(option = "B", limits = range(data[[variable]])) +
-      theme(legend.position="bottom")
 
   if (!dir.exists(outDir)) {
     dir.create(outDir, recursive = TRUE)
   }
 
-  cat("creating and saving plot", title, "... ")
-  pt <- proc.time()[3]
-  ggplot2::ggsave(
-    file.path(outDir, paste0(title, ".png")),
-    plot = plt,
-    width = 1920, height = 1080, units = "px", dpi = 150)
-  cat(" done after", proc.time()[3] - pt, "s\n")
+  dataTimeValues <- unique(data[[dataTimeName]])
+  cat("Split", dataTimeName, "into", nBatches, "batches.\n")
+  batches <- setupBatches(dataTimeValues, nBatches)
+  batch <- batches[[batchIndex]]
+  if (length(batch) == 0) {
+    cat("Batch", batchIndex, "is empty. Nothing to do.\n")
+    return(invisible())
+  }
+  cat("Process batch", batchIndex, "with", length(batch), dataTimeName, "values.\n")
+
+  for (dataTimeValue in batch) {
+
+    title <- paste(dataVariableName, dataTimeValue, sep = "_")
+
+    dataWithShape <-
+      shape |>
+      left_join(
+        data |>
+          filter(.data[[dataTimeName]] == .env$dataTimeValue) |>
+          select(all_of(dataRegionName), all_of(dataVariableName)),
+        join_by(!!shapeRegionName == !!dataRegionName))
+
+    plt <-
+      dataWithShape |>
+      ggplot(aes(geometry = .data$geom, fill = .data[[dataVariableName]])) +
+        geom_sf() +
+        ggtitle(title) +
+        scale_fill_viridis_c(option = "C", limits = range(data[[dataVariableName]])) +
+        theme(legend.position="bottom")
+
+    cat("creating and saving plot", title, "... ")
+    pt <- proc.time()[3]
+    ggplot2::ggsave(
+      file.path(outDir, paste0(title, ".png")),
+      plot = plt,
+      width = widthinPx, height = heightinPx, units = "px", dpi = dpi)
+    cat(" done after", proc.time()[3] - pt, "s\n")
+  }
 
 }
