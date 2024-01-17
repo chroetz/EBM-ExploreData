@@ -82,7 +82,7 @@ createMaps <- function(
     ggplot2::ggsave(
       file.path(outDir, paste0(title, ".png")),
       plot = plt,
-      width = widthinPx, height = heightinPx, units = "px", dpi = dpi)
+      width = widthInPx, height = heightInPx, units = "px", dpi = dpi)
     cat(" done after", proc.time()[3] - pt, "s\n")
   }
 
