@@ -18,14 +18,14 @@ createMaps <- function(
 ) {
 
   data <- read_csv(dataFilePath, col_types = cols())
-  if (!is.null(timeFilter)) {
+  if (hasValue(timeFilter)) {
     data <- filter(data, .data[[dataTimeName]] %in% timeFilter)
   }
-  if (!is.null(regionFilter)) {
+  if (hasValue(regionFilter)) {
     data <- filter(data, .data[[dataRegionName]] %in% regionFilter)
   }
 
-  if (length(variableTransformationText) > 0) {
+  if (hasValueString(variableTransformationText)) {
     transformation <- eval(parse(text = variableTransformationText))
     data <-
       data |>
@@ -38,7 +38,7 @@ createMaps <- function(
     shapeFilePath |>
     read_sf() |>
     select(all_of(shapeRegionName), .data$geom)
-  if (!is.null(regionFilter)) {
+  if (hasValue(regionFilter)) {
     shape <- filter(shape, .data[[shapeRegionName]] %in% regionFilter)
   }
   cat(" done after", proc.time()[3] - pt, "s\n")
