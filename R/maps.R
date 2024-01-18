@@ -4,7 +4,7 @@ createMaps <- function(
   dataVariableName,
   dataRegionName = "GID_1",
   dataTimeName = "year",
-  variableTransformationText = NULL,
+  variableTrans = "identity",
   shapeFilePath,
   shapeRegionName = "GID_1",
   outDir,
@@ -23,13 +23,6 @@ createMaps <- function(
   }
   if (hasValue(regionFilter)) {
     data <- filter(data, .data[[dataRegionName]] %in% regionFilter)
-  }
-
-  if (hasValueString(variableTransformationText)) {
-    transformation <- eval(parse(text = variableTransformationText))
-    data <-
-      data |>
-      mutate(across(all_of(dataVariableName), transformation))
   }
 
   cat("read geodata file...")
@@ -61,7 +54,7 @@ createMaps <- function(
     cat("processing", dataTimeName, dataTimeValue, "... ")
     pt <- proc.time()[3]
 
-    title <- paste(dataVariableName, dataTimeValue, sep = "_")
+    title <- paste(dataVariableName, variableTrans, dataTimeValue, sep = "_")
 
     dataWithShape <-
       shape |>
@@ -76,7 +69,11 @@ createMaps <- function(
       ggplot(aes(geometry = .data$geom, fill = .data[[dataVariableName]])) +
         geom_sf() +
         ggtitle(title) +
-        scale_fill_viridis_c(option = "C", limits = range(data[[dataVariableName]])) +
+        scale_fill_viridis_c(
+          option = "C",
+          limits = range(data[[dataVariableName]]),
+          trans = variableTrans
+        ) +
         theme(legend.position="bottom")
 
     ggplot2::ggsave(
