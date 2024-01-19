@@ -44,14 +44,7 @@ createMaps <- function(
   }
 
   dataTimeValues <- unique(data[[dataTimeName]])
-  cat("Split", dataTimeName, "into", nBatches, "batches.\n")
-  batches <- setupBatches(dataTimeValues, nBatches)
-  batch <- batches[[batchIndex]]
-  if (length(batch) == 0) {
-    cat("Batch", batchIndex, "is empty. Nothing to do.\n")
-    return(invisible())
-  }
-  cat("Process batch", batchIndex, "with", length(batch), dataTimeName, "values.\n")
+  batch <- splitAndGetOneBatch(dataTimeName, dataTimeValues, nBatches, batchIndex)
 
   for (dataTimeValue in batch) {
     cat("processing", dataTimeName, dataTimeValue, "... ")
