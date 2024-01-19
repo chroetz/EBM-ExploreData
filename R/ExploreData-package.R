@@ -7,6 +7,7 @@
 #' @importFrom ggplot2 ggplot aes geom_sf ggtitle scale_fill_viridis_c theme ggsave
 #' @importFrom rlang .data .env
 #' @importFrom EbmUtility setupBatches hasValue hasValueString
+#' @importFrom stringr str_detect str_glue
 NULL
 
 ## usethis namespace: start

@@ -16,4 +16,5 @@ Imports:
     ggplot2,
     readr,
     rlang,
-    sf
+    sf,
+    stringr

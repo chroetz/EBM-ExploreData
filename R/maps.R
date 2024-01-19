@@ -1,6 +1,7 @@
 #' @export
 createMaps <- function(
   dataFilePath,
+  dataSetName = EbmUtility::removeFileNameEnding(basename(dataFilePath)),
   dataVariableName,
   dataRegionName = "GID_1",
   dataTimeName = "year",
@@ -8,21 +9,23 @@ createMaps <- function(
   shapeFilePath,
   shapeRegionName = "GID_1",
   outDir,
+  outFileGlue = "{dataSetName}_{dataVariableName}_{variableTrans}_{dataTimeValue}.png",
+  plotTitleGlue = "{dataSetName} {dataTimeValue}",
   widthInPx = 1920,
   heightInPx = 1080,
   dpi = 150,
   nBatches = 1,
   batchIndex = 1,
   timeFilter = NULL,
-  regionFilter = NULL
+  regionRegex = NULL
 ) {
 
   data <- read_csv(dataFilePath, col_types = cols())
   if (hasValue(timeFilter)) {
     data <- filter(data, .data[[dataTimeName]] %in% timeFilter)
   }
-  if (hasValue(regionFilter)) {
-    data <- filter(data, .data[[dataRegionName]] %in% regionFilter)
+  if (hasValue(regionRegex)) {
+    data <- filter(data, stringr::str_detect(.data[[dataRegionName]], regionRegex))
   }
 
   cat("read geodata file...")
@@ -31,8 +34,8 @@ createMaps <- function(
     shapeFilePath |>
     read_sf() |>
     select(all_of(shapeRegionName), .data$geom)
-  if (hasValue(regionFilter)) {
-    shape <- filter(shape, .data[[shapeRegionName]] %in% regionFilter)
+  if (hasValue(regionRegex)) {
+    shape <- filter(shape, str_detect(.data[[dataRegionName]], regionRegex))
   }
   cat(" done after", proc.time()[3] - pt, "s\n")
 
@@ -54,7 +57,7 @@ createMaps <- function(
     cat("processing", dataTimeName, dataTimeValue, "... ")
     pt <- proc.time()[3]
 
-    title <- paste(dataVariableName, variableTrans, dataTimeValue, sep = "_")
+    plotTitle <- str_glue(plotTitleGlue)
 
     dataWithShape <-
       shape |>
@@ -68,16 +71,19 @@ createMaps <- function(
       dataWithShape |>
       ggplot(aes(geometry = .data$geom, fill = .data[[dataVariableName]])) +
         geom_sf() +
-        ggtitle(title) +
+        ggtitle(plotTitle) +
         scale_fill_viridis_c(
           option = "C",
           limits = range(data[[dataVariableName]]),
-          trans = variableTrans
+          trans = variableTrans,
+          guide = ggplot2::guide_colorbar(
+            title.position = "top",
+            barwidth = grid::unit(0.9, "npc"))
         ) +
         theme(legend.position="bottom")
 
     ggplot2::ggsave(
-      file.path(outDir, paste0(title, ".png")),
+      file.path(outDir, str_glue(outFileGlue)),
       plot = plt,
       width = widthInPx, height = heightInPx, units = "px", dpi = dpi)
     cat(" done after", proc.time()[3] - pt, "s\n")
