@@ -36,7 +36,20 @@ createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate) {
     return(invisible())
   }
   pt <- proc.time()[3]
-  tbl <- filter(tbl, .data$prefix == .env$prefix) |> arrange(.data$number)
+  tbl <-
+    tbl |>
+    filter(.data$prefix == .env$prefix) |>
+    arrange(.data$number)
+  invalidFiles <- file.size(tbl$filePath) == 0
+  if (any(invalidFiles)) {
+    cat(
+      "WARNING: Some files are invalidFiles:\n",
+      paste(tbl$filePath[invalidFiles], collapse=",\n"),
+      "\nIgnoring those.\n")
+    tbl <- tbl[!invalidFiles,]
+  }
+  cat("Use ", nrow(tbl), " images to create video", prefix, ".\n")
+
   lines <- c(
     paste0("file '", tbl$filePath, "'"),
     paste0("file '", last(tbl$filePath), "'"))
