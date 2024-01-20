@@ -3,6 +3,7 @@ createVideo <- function(
   imageDirPath,
   outDirPath = imageDirPath,
   frameRate = 5,
+  keepInfoTxtFile = FALSE,
   nBatches = 1,
   batchIndex = 1
 ) {
@@ -24,11 +25,11 @@ createVideo <- function(
   batch <- splitAndGetOneBatch("prefix", uniquePrefixes, nBatches, batchIndex)
 
   for (prefix in batch) {
-    createVideoForPrefix(prefix, tbl, outDirPath, frameRate)
+    createVideoForPrefix(prefix, tbl, outDirPath, frameRate, keepInfoTxtFile)
   }
 }
 
-createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate) {
+createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, keepInfoTxtFile = FALSE) {
   cat("Processing", prefix, "images...\n")
   outFilePath <- file.path(outDirPath, paste0(prefix, ".mp4"))
   if (file.exists(outFilePath)) {
@@ -65,6 +66,6 @@ createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate) {
   cat("run command:\n")
   cat(cmdText, "\n")
   system(cmdText)
-  file.remove(infoFilePath)
+  if (!keepInfoTxtFile) file.remove(infoFilePath)
   cat("Done after", proc.time()[3] - pt, "s.\n")
 }
