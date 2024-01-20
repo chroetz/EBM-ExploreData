@@ -16,8 +16,8 @@ createVideo <- function(
     matches |>
     as_tibble() |>
     mutate(
-      number = as.numeric(number),
-      filePath = normalizePath(file.path(imageDirPath, fileName)))
+      number = as.numeric(.data$number),
+      filePath = normalizePath(file.path(imageDirPath, .data$fileName)))
   uniquePrefixes <- unique(tbl$prefix)
   cat(sprintf("Found %d files with %d unique prefixes.\n", nrow(tbl), length(uniquePrefixes)))
 
@@ -36,7 +36,7 @@ createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate) {
     return(invisible())
   }
   pt <- proc.time()[3]
-  tbl <- filter(tbl, .data$prefix == .env$prefix) |> arrange(number)
+  tbl <- filter(tbl, .data$prefix == .env$prefix) |> arrange(.data$number)
   lines <- c(
     paste0("file '", tbl$filePath, "'"),
     paste0("file '", last(tbl$filePath), "'"))
