@@ -3,12 +3,22 @@ createVideo <- function(
   imageDirPath,
   outDirPath = imageDirPath,
   frameRate = 5,
+  outFormat = c("mpeg4", "gif"),
   keepInfoTxtFile = FALSE,
   nBatches = 1,
   batchIndex = 1
 ) {
-
   cat("Creating videos from images in", imageDirPath, "...\n")
+
+  outFormat <- match.arg(outFormat)
+  videoCodecSpec <- switch(outFormat,
+    "mpeg4" = '-c:v mpeg4 -q:v 1 -vf "fps=25,format=yuv420p"',
+    "gif" = '-filter_complex "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse"',
+    stop("Unknown format: ", outFormat))
+  outFileEnding <- switch(outFormat,
+    "mpeg4" = ".mp4",
+    "gif" = ".gif",
+    stop("Unknown format: ", outFormat))
 
   fileNames <- list.files(path = imageDirPath, pattern = ".+_[+-]?\\d+(\\.\\d*)?\\.png$")
   matches <- str_match(fileNames, "(.+)_([+-]?\\d+(\\.\\d*)?)\\.png$")[,1:3]
@@ -25,13 +35,13 @@ createVideo <- function(
   batch <- splitAndGetOneBatch("prefix", uniquePrefixes, nBatches, batchIndex)
 
   for (prefix in batch) {
-    createVideoForPrefix(prefix, tbl, outDirPath, frameRate, keepInfoTxtFile)
+    createVideoForPrefix(prefix, tbl, outDirPath, frameRate, videoCodecSpec, outFileEnding, keepInfoTxtFile)
   }
 }
 
-createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, keepInfoTxtFile = FALSE) {
+createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, videoCodecSpec, outFileEnding, keepInfoTxtFile = FALSE) {
   cat("Processing", prefix, "images...\n")
-  outFilePath <- file.path(outDirPath, paste0(prefix, ".mp4"))
+  outFilePath <- file.path(outDirPath, paste0(prefix, ".", outFileEnding))
   if (file.exists(outFilePath)) {
     cat("File", outFilePath, "already exists. Skipping.\n")
     return(invisible())
@@ -58,9 +68,10 @@ createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, keepInfoTxt
   cat("Writing info file", infoFilePath, "...\n")
   writeLines(lines, infoFilePath)
   cmdText <- sprintf(
-    'ffmpeg -r %f -f concat -safe 0 -i "%s" -c:v libx264 -vf "fps=25,format=yuv420p" "%s"',
+    'ffmpeg -r %f -f concat -safe 0 -i "%s" %s "%s"',
     frameRate,
     normalizePath(infoFilePath, mustWork=TRUE),
+    videoCodecSpec,
     normalizePath(outFilePath, mustWork=FALSE)
   )
   cat("run command:\n")
