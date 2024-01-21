@@ -41,7 +41,7 @@ createVideo <- function(
 
 createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, videoCodecSpec, outFileEnding, keepInfoTxtFile = FALSE) {
   cat("Processing", prefix, "images...\n")
-  outFilePath <- file.path(outDirPath, paste0(prefix, ".", outFileEnding))
+  outFilePath <- file.path(outDirPath, paste0(prefix, outFileEnding))
   if (file.exists(outFilePath)) {
     cat("File", outFilePath, "already exists. Skipping.\n")
     return(invisible())
@@ -59,12 +59,22 @@ createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, videoCodecS
       "\nIgnoring those.\n")
     tbl <- tbl[!invalidFiles,]
   }
-  cat("Use ", nrow(tbl), " images to create video", prefix, ".\n")
+  cat("Use", nrow(tbl), "images to create video", prefix, ".\n")
 
   lines <- c(
     paste0("file '", tbl$filePath, "'"),
     paste0("file '", last(tbl$filePath), "'"))
-  infoFilePath <- file.path(outDirPath, paste0(prefix, "_imageToVideoInfo.txt"))
+  if (keepInfoTxtFile) {
+    infoFilePath <- file.path(
+      outDirPath,
+      paste0(
+        prefix,
+        "_imageToVideoInfo_",
+        Sys.time() |> format("%Y%m%d_%H%M%S"),
+        ".txt"))
+  } else {
+    infoFilePath <- tempfile(fileext = ".txt")
+  }
   cat("Writing info file", infoFilePath, "...\n")
   writeLines(lines, infoFilePath)
   cmdText <- sprintf(
