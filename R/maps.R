@@ -29,7 +29,7 @@ createMaps <- function(
   }
   v <- data[[dataVariableName]]
   limits <- range(v[is.finite(v)])
-  transform <- scales::as.transform("variableTrans")
+  transform <- scales::as.transform(variableTrans)
   if (!is.finite(transform$transform(0)) && limits[1] == 0) {
     limits[1] <- pmax(.Machine$double.xmin, min(v[v>0]))
   }
