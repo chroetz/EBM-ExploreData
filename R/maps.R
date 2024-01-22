@@ -31,7 +31,7 @@ createMaps <- function(
   limits <- range(v[is.finite(v)])
   transform <- scales::as.transform(variableTrans)
   if (!is.finite(transform$transform(0)) && limits[1] == 0) {
-    limits[1] <- pmax(.Machine$double.xmin, min(v[v>0]))
+    limits[1] <- pmax(.Machine$double.xmin, min(v[v>0], na.rm = TRUE))
     cat("Transformed 0 is NaN. Setting lower limit to", limits[1], "\n")
   }
 
