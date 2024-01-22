@@ -27,6 +27,12 @@ createMaps <- function(
   if (hasValue(regionRegex)) {
     data <- filter(data, stringr::str_detect(.data[[dataRegionName]], regionRegex))
   }
+  v <- data[[dataVariableName]]
+  limits <- range(v[is.finite(v)])
+  transform <- scales::as.transform("variableTrans")
+  if (!is.finite(transform$transform(0)) && limits[1] == 0) {
+    limits[1] <- pmax(.Machine$double.xmin, min(v[v>0]))
+  }
 
   cat("read geodata file...")
   pt <- proc.time()[3]
@@ -67,7 +73,7 @@ createMaps <- function(
         ggtitle(plotTitle) +
         scale_fill_viridis_c(
           option = "C",
-          limits = range(data[[dataVariableName]]),
+          limits = limits,
           trans = variableTrans,
           guide = ggplot2::guide_colorbar(
             title.position = "top",

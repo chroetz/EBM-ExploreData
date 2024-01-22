@@ -16,6 +16,7 @@ Imports:
     ggplot2,
     readr,
     rlang,
+    scales,
     sf,
     stringr,
     tibble
