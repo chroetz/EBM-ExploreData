@@ -3,7 +3,7 @@ createVideo <- function(
   imageDirPath,
   outDirPath = imageDirPath,
   frameRate = 5,
-  outFormat = c("mpeg4", "gif"),
+  outFormat = c("mpeg4", "h264", "gif"),
   keepInfoTxtFile = FALSE,
   nBatches = 1,
   batchIndex = 1
@@ -13,6 +13,7 @@ createVideo <- function(
   outFormat <- match.arg(outFormat)
   videoCodecSpec <- switch(outFormat,
     "mpeg4" = '-c:v mpeg4 -q:v 1 -vf "fps=25,format=yuv420p"',
+    "h264" = '-c:v libx264 -q:v 1 -vf "fps=25,format=yuv420p"',
     "gif" = '-filter_complex "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse"',
     stop("Unknown format: ", outFormat))
   outFileEnding <- switch(outFormat,
