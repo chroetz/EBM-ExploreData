@@ -18,6 +18,7 @@ createVideo <- function(
     stop("Unknown format: ", outFormat))
   outFileEnding <- switch(outFormat,
     "mpeg4" = ".mp4",
+    "h264" = ".mp4",
     "gif" = ".gif",
     stop("Unknown format: ", outFormat))
 
