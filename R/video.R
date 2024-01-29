@@ -2,6 +2,7 @@
 createVideo <- function(
   imageDirPath,
   outDirPath = imageDirPath,
+  outFileGlue = "{prefix}_r{round(frameRate)}.{outFileEnding}",
   frameRate = 5,
   outFormat = c("mpeg4", "h264", "gif"),
   keepInfoTxtFile = FALSE,
@@ -43,8 +44,8 @@ createVideo <- function(
 
 createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, videoCodecSpec, outFileEnding, keepInfoTxtFile = FALSE) {
   cat("Processing", prefix, "images...\n")
-  suffix <- paste0("_r", round(frameRate))
-  outFilePath <- file.path(outDirPath, paste0(prefix, suffix, outFileEnding))
+  outFileName <- str_glue(outFileGlue)
+  outFilePath <- file.path(outDirPath, outFileName)
   if (file.exists(outFilePath)) {
     cat("File", outFilePath, "already exists. Skipping.\n")
     return(invisible())
