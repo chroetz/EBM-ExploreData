@@ -43,7 +43,8 @@ createVideo <- function(
 
 createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, videoCodecSpec, outFileEnding, keepInfoTxtFile = FALSE) {
   cat("Processing", prefix, "images...\n")
-  outFilePath <- file.path(outDirPath, paste0(prefix, outFileEnding))
+  suffix <- paste0("_r", round(frameRate))
+  outFilePath <- file.path(outDirPath, paste0(prefix, suffix, outFileEnding))
   if (file.exists(outFilePath)) {
     cat("File", outFilePath, "already exists. Skipping.\n")
     return(invisible())
