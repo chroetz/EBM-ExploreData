@@ -38,11 +38,28 @@ createVideo <- function(
   batch <- splitAndGetOneBatch("prefix", uniquePrefixes, nBatches, batchIndex)
 
   for (prefix in batch) {
-    createVideoForPrefix(prefix, tbl, outDirPath, frameRate, videoCodecSpec, outFileEnding, keepInfoTxtFile)
+    createVideoForPrefix(
+      prefix,
+      tbl,
+      outDirPath,
+      frameRate,
+      videoCodecSpec,
+      outFileEnding,
+      outFileGlue,
+      keepInfoTxtFile)
   }
 }
 
-createVideoForPrefix <- function(prefix, tbl, outDirPath, frameRate, videoCodecSpec, outFileEnding, keepInfoTxtFile = FALSE) {
+createVideoForPrefix <- function(
+    prefix,
+    tbl,
+    outDirPath,
+    frameRate,
+    videoCodecSpec,
+    outFileEnding,
+    outFileGlue,
+    keepInfoTxtFile = FALSE
+) {
   cat("Processing", prefix, "images...\n")
   outFileName <- str_glue(outFileGlue)
   outFilePath <- file.path(outDirPath, outFileName)
