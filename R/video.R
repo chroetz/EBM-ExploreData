@@ -2,7 +2,7 @@
 createVideo <- function(
   imageDirPath,
   outDirPath = imageDirPath,
-  outFileGlue = "{prefix}_r{round(frameRate)}.{outFileEnding}",
+  outFileGlue = "{prefix}_r{round(frameRate)}{outFileEnding}",
   frameRate = 5,
   outFormat = c("mpeg4", "h264", "gif"),
   keepInfoTxtFile = FALSE,
