@@ -33,10 +33,13 @@ createMaps <- function(
 
   # limits and out of bounds
   v <- data[[dataVariableName]]
-  if (!hasValue(limits)) {
-    limits <- range(v[is.finite(v)])
+  vRange <- range(v[is.finite(v)])
+  if (length(limits) != 2) {
+    limits <- vRange
   }
-  if (!hasValueString(outOfBoundsHandling) == 0) {
+  if (is.na(limits[1])) limits[1] <- vRange[1]
+  if (is.na(limits[2])) limits[2] <- vRange[2]
+  if (!hasValueString(outOfBoundsHandling)) {
     outOfBoundsHandling <- "censor"
   }
   oob <- switch(
@@ -45,6 +48,18 @@ createMaps <- function(
     "squish_infinite" = scales::squish_infinite,
     "censor" = scales::censor,
     scales::censor)
+  labelsFunction <- if (startsWith(outOfBoundsHandling, "squish")) {
+      \(x) {
+        labels <- scales::label_number_auto()(x)
+        if (length(labels) >= 2) {
+          if (limits[1] > vRange[1]) labels[1] <- paste0("≤", labels[1])
+          if (limits[2] < vRange[2]) labels[length(labels)] <- paste0("≥", labels[length(labels)])
+        }
+        return(labels)
+    }
+  } else {
+    scales::label_number_auto()
+  }
   transform <- scales::as.transform(variableTrans)
   if (!is.finite(transform$transform(0)) && limits[1] == 0) {
     limits[1] <- pmax(.Machine$double.xmin, min(v[v>0], na.rm = TRUE))
@@ -91,6 +106,7 @@ createMaps <- function(
         scale_fill_viridis_c(
           option = "C",
           limits = limits,
+          labels = labelsFunction,
           oob = oob,
           trans = variableTrans,
           guide = ggplot2::guide_colorbar(
