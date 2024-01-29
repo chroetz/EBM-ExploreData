@@ -6,6 +6,8 @@ createMaps <- function(
   dataRegionName = "GID_1",
   dataTimeName = "year",
   variableTrans = "identity",
+  limits = NULL,
+  outOfBoundsHandling = NULL,
   shapeFilePath,
   shapeRegionName = "GID_1",
   outDir,
@@ -20,6 +22,7 @@ createMaps <- function(
   regionRegex = NULL
 ) {
 
+  # load and filter data
   data <- read_csv(dataFilePath, col_types = cols())
   if (hasValue(timeFilter)) {
     data <- filter(data, .data[[dataTimeName]] %in% timeFilter)
@@ -27,8 +30,21 @@ createMaps <- function(
   if (hasValue(regionRegex)) {
     data <- filter(data, stringr::str_detect(.data[[dataRegionName]], regionRegex))
   }
+
+  # limits and out of bounds
   v <- data[[dataVariableName]]
-  limits <- range(v[is.finite(v)])
+  if (!hasValue(limits)) {
+    limits <- range(v[is.finite(v)])
+  }
+  if (!hasValueString(outOfBoundsHandling) == 0) {
+    outOfBoundsHandling <- "censor"
+  }
+  oob <- switch(
+    outOfBoundsHandling,
+    "squish" = scales::squish,
+    "squish_infinite" = scales::squish_infinite,
+    "censor" = scales::censor,
+    scales::censor)
   transform <- scales::as.transform(variableTrans)
   if (!is.finite(transform$transform(0)) && limits[1] == 0) {
     limits[1] <- pmax(.Machine$double.xmin, min(v[v>0], na.rm = TRUE))
@@ -75,6 +91,7 @@ createMaps <- function(
         scale_fill_viridis_c(
           option = "C",
           limits = limits,
+          oob = oob,
           trans = variableTrans,
           guide = ggplot2::guide_colorbar(
             title.position = "top",
