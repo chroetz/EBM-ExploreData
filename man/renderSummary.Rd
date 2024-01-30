@@ -10,6 +10,7 @@ renderSummary(
   outFormat = "HTML",
   envir = new.env(),
   quiet = FALSE,
+  debug = FALSE,
   ...
 )
 }
@@ -30,6 +31,9 @@ to be evaluated. See the argument of the same name in
 data in your global environment during development.}
 
 \item{quiet}{\code{logical(1)}. Suppress printing during rendering?}
+
+\item{debug}{\code{logical(1)}. Should the debug Rmd be rendered instead of
+the main one?}
 
 \item{...}{YAML parameters, see below.}
 }

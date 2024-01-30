@@ -16,7 +16,7 @@ output:
     keep_tex: true
 geometry: "a4paper,landscape,left=0.5cm,right=0.5cm,top=0.5cm,bottom=0.5cm,footnotesep=0.0cm,footskip=0.1cm"
 params:
-  filePath: "path/to/data.csv"
+  dataFilePath: "path/to/data.csv"
   variableName: "columnOfInterest"
   documentTitle: "Summary of Variable"
   regionName: "GID_1"
@@ -65,7 +65,7 @@ library(ExploreData)
 
 ```{r}
 # Load and preprocess data.
-data <- read_csv(params$filePath, col_types = cols())
+data <- read_csv(params$dataFilePath, col_types = cols())
 if (!is.null(params$regionNameDelim) && !is.null(params$regionNamePartNames)) {
   data <- 
     data |> 

@@ -54,7 +54,7 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r}
+```{r packages}
 options(tidyverse.quiet = TRUE)
 library(tidyverse)
 library(sf)
@@ -64,7 +64,7 @@ library(ExploreData)
 ```
 
 
-```{r}
+```{r shapefiles}
 shapeCountry <- NULL
 shapeRegion <- NULL
 if (params$createMaps) {
@@ -93,7 +93,7 @@ if (params$createMaps) {
 }
 ```
 
-```{r}
+```{r data}
 # Load and preprocess data.
 data <- read_csv(params$dataFilePath, col_types = cols())
 if (!is.null(params$regionNameDelim) && !is.null(params$regionNamePartNames)) {
@@ -123,14 +123,14 @@ if (hasValueString(params$countryRegex)) {
 
 # Parameters
 
-```{r include=TRUE}
+```{r showParameters, include=TRUE}
 dput(params)
 ```
 
 
 # Meta 
 
-```{r}
+```{r metafuns}
 metaSummaryfuns <- 
   list(
     n = length,
@@ -142,7 +142,7 @@ metaSummaryfuns <-
     max = \(x) max(x, na.rm = TRUE))
 ```
 
-```{r include=TRUE}
+```{r showMeta, include=TRUE}
 data |> 
   reframe(across(everything(), \(x) sapply(metaSummaryfuns, do.call, args=list(x)))) |>
   mutate(name = names(metaSummaryfuns), .before=1) |> 
@@ -152,18 +152,18 @@ data |>
 
 # Data By Region and Time
 
-```{r}
+```{r regionAndTimeData}
 d <- data
 ```
 
-```{r results='asis', include=TRUE}
+```{r showRegionAndTime, results='asis', include=TRUE}
 showStandardSummary(d, params)
 ```
 
 
 # Data By Country and Time
 
-```{r}
+```{r countryAndTimeData}
 d <- 
   data |> 
   summarizeDataBy(
@@ -172,14 +172,14 @@ d <-
     params$aggregateFunctions)
 ```
 
-```{r results='asis', include=TRUE}
+```{r showCountyAndTime, results='asis', include=TRUE}
 showStandardSummary(d, params)
 ```
 
 
 # Data By Region
 
-```{r}
+```{r regionData}
 d <- 
   data |> 
   summarizeDataBy(
@@ -188,14 +188,14 @@ d <-
     params$aggregateFunctions)
 ```
 
-```{r results='asis', include=TRUE}
+```{r showRegion, results='asis', include=TRUE}
 showStandardSummary(d, params, shapeRegion=shapeRegion)
 ```
 
 
 # Data By Country
 
-```{r}
+```{r countryData}
 d <- 
   data |> 
   summarizeDataBy(
@@ -204,14 +204,14 @@ d <-
     params$aggregateFunctions)
 ```
 
-```{r results='asis', include=TRUE}
+```{r showCountry, results='asis', include=TRUE}
 showStandardSummary(d, params, shapeCountry=shapeCountry)
 ```
 
 
 # Data by Time
 
-```{r}
+```{r timeData}
 d <- 
   data |> 
   summarizeDataBy(
@@ -220,7 +220,7 @@ d <-
     params$aggregateFunctions)
 ```
 
-```{r results='asis', include=TRUE}
+```{r showTime, results='asis', include=TRUE}
 showStandardSummary(d, params)
 ```
 

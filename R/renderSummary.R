@@ -15,6 +15,8 @@
 #'   \code{globalenv()} and \code{sections} to \code{NULL} to load an preprocess
 #'   data in your global environment during development.
 #' @param quiet \code{logical(1)}. Suppress printing during rendering?
+#' @param debug \code{logical(1)}. Should the debug Rmd be rendered instead of
+#'   the main one?
 #' @param ... YAML parameters, see below.
 #' @return The value returned by
 #'   \code{\link[rmarkdown:render]{rmarkdown::render()}}.
@@ -109,6 +111,7 @@ renderSummary <- function(
   outFormat = "HTML",
   envir = new.env(),
   quiet = FALSE,
+  debug = FALSE,
   ...
 ) {
   # Set yaml parameters and convert relative to absolute paths.
@@ -119,17 +122,25 @@ renderSummary <- function(
   }
   yamlParams$documentTitle <- paste0("Summary of ", yamlParams$variableName)
 
+  if (debug) {
+    rmdSourceFilePath <- system.file("markdown/summary_debug.Rmd", package = "ExploreData")
+  } else {
+    rmdSourceFilePath <- system.file("markdown/summary.Rmd", package = "ExploreData")
+  }
+
   outFormat <- tolower(outFormat)[[1]]
   if (outFormat == "pdf") {
     outFormat <- "pdf_document"
   } else if (outFormat == "html") {
     outFormat <- "html_document"
   } else if (outFormat == "rmd") {
-    return(.summaryOfVariableRmd(yamlParams, outDir, outFileName))
+    return(.summaryOfVariableRmd(yamlParams, rmdSourceFilePath, outDir, outFileName))
   }
 
+  yamlParams <- expressionsToObject(yamlParams)
+
   rmarkdown::render(
-    system.file("markdown/summary.Rmd", package = "ExploreData"),
+    rmdSourceFilePath,
     intermediates_dir = outDir,
     output_dir = outDir,
     output_file = outFileName,
@@ -140,14 +151,14 @@ renderSummary <- function(
 }
 
 
-.summaryOfVariableRmd <- function(yamlParams, outDir, outFileName) {
-  pathMain <- system.file("markdown/summary.Rmd", package = "ExploreData")
-  linesMain <- readLines(pathMain)
+.summaryOfVariableRmd <- function(yamlParams, rmdSourceFilePath, outDir, outFileName) {
+  linesMain <- readLines(rmdSourceFilePath)
   delimiters <- grep("^(---|\\.\\.\\.)\\s*$", linesMain)
   headerMain <- linesMain[(delimiters[1]):(delimiters[2])]
   yml <- yaml::yaml.load(
     headerMain,
     handlers = list(r = function(x) ymlthis::yml_params_code(!!rlang::parse_expr(x))))
+  yamlParams <- expressionsToYmlCode(yamlParams)
   baseYaml <- ymlthis::as_yml(yml)
   newYamlParams <- baseYaml$params
   newYamlParams[names(yamlParams)] <- yamlParams
@@ -156,16 +167,32 @@ renderSummary <- function(
     params = newYamlParams,
     date = format(Sys.Date()))
 
-  rmdSourceFilePath <- system.file("markdown/summary.Rmd", package = "ExploreData")
   rmdDstFilePath <- file.path(outDir, paste0(outFileName, ".Rmd"))
   file.copy(rmdSourceFilePath, rmdDstFilePath)
   ymlthis::use_rmarkdown(
     newYaml,
     path = rmdDstFilePath,
-    template = system.file(
-      "markdown/summary.Rmd",
-      package = "ExploreData"),
+    template = rmdSourceFilePath,
     include_yaml = FALSE,
     overwrite = TRUE,
     quiet = TRUE)
+}
+
+
+expressionsToYmlCode <- function(params) {
+  selExpr <- sapply(params, \(x) typeof(x) %in% c("symbol", "language"))
+  params[selExpr] <- lapply(
+    params[selExpr],
+    \(x) ymlthis::yml_params_code(!!x)
+  )
+  return(params)
+}
+
+expressionsToObject <- function(params) {
+  selExpr <- sapply(params, \(x) typeof(x) %in% c("symbol", "language"))
+  params[selExpr] <- lapply(
+    params[selExpr],
+    rlang::eval_bare
+  )
+  return(params)
 }
