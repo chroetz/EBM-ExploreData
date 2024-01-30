@@ -52,8 +52,8 @@ createMaps <- function(
       \(x) {
         labels <- scales::label_number_auto()(x)
         if (length(labels) >= 2) {
-          if (limits[1] > vRange[1]) labels[1] <- paste0("≤", labels[1])
-          if (limits[2] < vRange[2]) labels[length(labels)] <- paste0("≥", labels[length(labels)])
+          if (limits[1] > vRange[1]) labels[1] <- paste0("\u2264", labels[1])
+          if (limits[2] < vRange[2]) labels[length(labels)] <- paste0("\u2265", labels[length(labels)])
         }
         return(labels)
     }

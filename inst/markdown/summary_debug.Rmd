@@ -1,0 +1,132 @@
+---
+title: "`r params$documentTitle`"
+author: "Christof"
+date: "`r format(Sys.time(), '%d.%m.%Y')`"
+output: 
+  html_document:
+    self_contained: true
+    toc: yes
+    toc_float: yes
+    toc_depth: 3
+    number_sections: yes
+  pdf_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 3
+    keep_tex: true
+geometry: "a4paper,landscape,left=0.5cm,right=0.5cm,top=0.5cm,bottom=0.5cm,footnotesep=0.0cm,footskip=0.1cm"
+params:
+  filePath: "path/to/data.csv"
+  variableName: "columnOfInterest"
+  documentTitle: "Summary of Variable"
+  regionName: "GID_1"
+  regionNameDelim: "."
+  regionNamePartNames: !r c("country", "subRegionId")
+  countryName: "country"
+  timeName: "year"
+  timeRange: !r c(1950, 2050)
+  shapeRegionFilePath: "path/to/regionShapefile.gpkg"
+  shapeRegionLayer: null
+  shapeRegionName: "GID_1"
+  shapeCountryFilePath: "path/to/countryShapefile.gpkg"
+  shapeCountryLayer: null
+  shapeCountryName: "GID_0"
+  regionRegex: null
+  countryRegex: null
+  aggregateFunctions: !r list(mean = \(x) mean(x, na.rm=TRUE), sd = \(x) sd(x, na.rm=TRUE))
+  transformations: !r list(mean = c("identity", "log10"), sd = "identity")
+  createMaps: true
+  figWidth: 10
+  figHeight: 6
+  warning: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  error = TRUE,
+  message = TRUE,
+  include = TRUE,
+  warning = TRUE,
+  out.width = "100%",
+  fig.width = params$figWidth,
+  fig.width = params$figHeight)
+```
+
+
+```{r}
+options(tidyverse.quiet = TRUE)
+library(tidyverse)
+library(sf)
+suppressWarnings(library(kableExtra))
+library(EbmUtility)
+library(ExploreData)
+```
+
+```{r}
+# Load and preprocess data.
+data <- read_csv(params$filePath, col_types = cols())
+if (!is.null(params$regionNameDelim) && !is.null(params$regionNamePartNames)) {
+  data <- 
+    data |> 
+    separate_wider_delim(
+      !!params$regionName,
+      delim = params$regionNameDelim, 
+      names = params$regionNamePartNames,
+      cols_remove= FALSE)
+}
+if (length(params$timeRange) == 2) {
+  data <- 
+    data |> 
+    filter(
+      .data[[params$timeName]] >= params$timeRange[1], 
+      .data[[params$timeName]] <= params$timeRange[2])
+}
+if (hasValueString(params$regionRegex)) {
+  data <- filter(data, str_detect(.data[[params$regionName]], params$regionRegex))
+}
+if (hasValueString(params$countryRegex)) {
+  data <- filter(data, str_detect(.data[[params$countryName]], params$countryRegex))
+}
+```
+
+
+# Parameters
+
+```{r include=TRUE}
+dput(params)
+```
+
+
+# Meta 
+
+```{r}
+metaSummaryfuns <- 
+  list(
+    n = length,
+    nUnique = \(x) length(unique(x)),
+    nNA = \(x) sum(is.na(x)),
+    nZero = \(x) sum(x==0, na.rm = TRUE),
+    nFinite = \(x) sum(is.finite(x)),
+    min = \(x) min(x, na.rm = TRUE),
+    max = \(x) max(x, na.rm = TRUE))
+```
+
+```{r include=TRUE}
+data |> 
+  reframe(across(everything(), \(x) sapply(metaSummaryfuns, do.call, args=list(x)))) |>
+  mutate(name = names(metaSummaryfuns), .before=1) |> 
+  showTable("Summary of Metadata")
+```
+
+
+# Data By Region and Time
+
+```{r}
+d <- data
+```
+
+```{r results='asis', include=TRUE}
+showStandardSummary(d, params)
+```
+
