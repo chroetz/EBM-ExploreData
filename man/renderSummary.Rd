@@ -44,16 +44,16 @@ time column.
 \section{YAML Parameters}{
 
 \describe{
-\item{\code{filePath}}{
+\item{\code{dataFilePath}}{
 \code{character(1)}.
 Path to a csv file.}
 \item{\code{variableName}}{
 \code{character(1)}.
-The name of the column in the csv file \code{filePath} to be shown.}
+The name of the column in the csv file \code{dataFilePath} to be shown.}
 \item{\code{regionName}}{
 \code{character(1)}.
 Default: \code{"GID_1"}.
-The name of the region column in the csv file \code{filePath}.}
+The name of the region column in the csv file \code{dataFilePath}.}
 \item{\code{regionNameDelim}}{
 \code{character(1)}.
 Default: \code{"."}.
@@ -65,11 +65,11 @@ Names of the parts of the \code{regionName} after split by \code{regionNameDelim
 \item{\code{countryName}}{
 \code{character(1)}.
 Default: \code{"country"}.
-Name of the country column in the csv file \code{filePath}.}
+Name of the country column in the csv file \code{dataFilePath}.}
 \item{\code{timeName}}{
 \code{character(1)}.
 Default: \code{"year"}.
-The name of the time column in the csv file \code{filePath}.}
+The name of the time column in the csv file \code{dataFilePath}.}
 \item{\code{timeRange}}{
 \code{numeric(2)} or \code{NULL}.
 Default: \code{c(1950, 2050)}.
