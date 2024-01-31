@@ -59,8 +59,8 @@ options(tidyverse.quiet = TRUE)
 library(tidyverse)
 library(sf)
 suppressWarnings(library(kableExtra))
-library(EbmUtility)
-library(ExploreData)
+library(cerUtility)
+library(cerExploreData)
 ```
 
 ```{r}

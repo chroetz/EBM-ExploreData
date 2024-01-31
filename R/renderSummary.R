@@ -123,9 +123,9 @@ renderSummary <- function(
   yamlParams$documentTitle <- paste0("Summary of ", yamlParams$variableName)
 
   if (debug) {
-    rmdSourceFilePath <- system.file("markdown/summary_debug.Rmd", package = "ExploreData")
+    rmdSourceFilePath <- system.file("markdown/summary_debug.Rmd", package = "cerExploreData")
   } else {
-    rmdSourceFilePath <- system.file("markdown/summary.Rmd", package = "ExploreData")
+    rmdSourceFilePath <- system.file("markdown/summary.Rmd", package = "cerExploreData")
   }
 
   outFormat <- tolower(outFormat)[[1]]

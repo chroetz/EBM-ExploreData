@@ -1,7 +1,7 @@
 #' @export
 createMaps <- function(
   dataFilePath,
-  dataSetName = EbmUtility::removeFileNameEnding(basename(dataFilePath)),
+  dataSetName = cerUtility::removeFileNameEnding(basename(dataFilePath)),
   dataVariableName,
   dataRegionName = "GID_1",
   dataTimeName = "year",
