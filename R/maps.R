@@ -18,14 +18,18 @@ createMaps <- function(
   dpi = 150,
   nBatches = 1,
   batchIndex = 1,
-  timeFilter = NULL,
+  timeRange = NULL,
   regionRegex = NULL
 ) {
 
   # load and filter data
   data <- read_csv(dataFilePath, col_types = cols())
-  if (hasValue(timeFilter)) {
-    data <- filter(data, .data[[dataTimeName]] %in% timeFilter)
+  if (length(timeRange) == 2) {
+    data <-
+      data |>
+      filter(
+        .data[[dataTimeName]] >= timeRange[1],
+        .data[[dataTimeName]] <= timeRange[2])
   }
   if (hasValue(regionRegex)) {
     data <- filter(data, stringr::str_detect(.data[[dataRegionName]], regionRegex))
