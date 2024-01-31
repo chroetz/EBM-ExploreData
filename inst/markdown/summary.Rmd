@@ -95,7 +95,13 @@ if (params$createMaps) {
 
 ```{r data}
 # Load and preprocess data.
-data <- read_csv(params$dataFilePath, col_types = cols())
+data <- 
+  read_csv(params$dataFilePath, col_types = cols()) |>
+  select(any_of(c(
+    params$regionName, 
+    params$countryName, 
+    params$timeName, 
+    params$variableName)))
 if (!is.null(params$regionNameDelim) && !is.null(params$regionNamePartNames)) {
   data <- 
     data |> 
