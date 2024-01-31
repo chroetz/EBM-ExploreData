@@ -10,7 +10,7 @@ createMaps <- function(
   outOfBoundsHandling = NULL,
   shapeFilePath,
   shapeRegionName = "GID_1",
-  outDir,
+  outDirPath,
   outFileGlue = "{dataSetName}_{dataVariableName}_{variableTrans}_{dataTimeValue}.png",
   plotTitleGlue = "{dataSetName} {dataTimeValue}",
   widthInPx = 1920,
@@ -77,8 +77,8 @@ createMaps <- function(
   }
   cat(" done after", proc.time()[3] - pt, "s\n")
 
-  if (!dir.exists(outDir)) {
-    dir.create(outDir, recursive = TRUE)
+  if (!dir.exists(outDirPath)) {
+    dir.create(outDirPath, recursive = TRUE)
   }
 
   dataTimeValues <- unique(data[[dataTimeName]])
@@ -116,7 +116,7 @@ createMaps <- function(
         theme(legend.position="bottom")
 
     ggplot2::ggsave(
-      file.path(outDir, str_glue(outFileGlue)),
+      file.path(outDirPath, str_glue(outFileGlue)),
       plot = plt,
       width = widthInPx, height = heightInPx, units = "px", dpi = dpi)
     cat(" done after", proc.time()[3] - pt, "s\n")

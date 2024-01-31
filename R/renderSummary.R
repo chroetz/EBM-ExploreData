@@ -5,7 +5,7 @@
 #'
 #' @param outFileName \code{character(1)}. File name (without extension) of the
 #'   output document to be created.
-#' @param outDir \code{character(1)}. The directory where the output document
+#' @param outDirPath \code{character(1)}. The directory where the output document
 #'   and intermediary files are created.
 #' @param outFormat \code{character(1)}, not case-sensitive. \code{"html"},
 #'   \code{"pdf"}, or \code{"rmd"}.
@@ -106,7 +106,7 @@
 #' @author Christof Schoetz
 #' @export
 renderSummary <- function(
-  outDir = getwd(),
+  outDirPath = getwd(),
   outFileName = "Summary",
   outFormat = "HTML",
   envir = new.env(),
@@ -134,15 +134,15 @@ renderSummary <- function(
   } else if (outFormat == "html") {
     outFormat <- "html_document"
   } else if (outFormat == "rmd") {
-    return(.summaryOfVariableRmd(yamlParams, rmdSourceFilePath, outDir, outFileName))
+    return(.summaryOfVariableRmd(yamlParams, rmdSourceFilePath, outDirPath, outFileName))
   }
 
   yamlParams <- expressionsToObject(yamlParams)
 
   rmarkdown::render(
     rmdSourceFilePath,
-    intermediates_dir = outDir,
-    output_dir = outDir,
+    intermediates_dir = outDirPath,
+    output_dir = outDirPath,
     output_file = outFileName,
     output_format = outFormat,
     params = yamlParams,
@@ -151,7 +151,7 @@ renderSummary <- function(
 }
 
 
-.summaryOfVariableRmd <- function(yamlParams, rmdSourceFilePath, outDir, outFileName) {
+.summaryOfVariableRmd <- function(yamlParams, rmdSourceFilePath, outDirPath, outFileName) {
   linesMain <- readLines(rmdSourceFilePath)
   delimiters <- grep("^(---|\\.\\.\\.)\\s*$", linesMain)
   headerMain <- linesMain[(delimiters[1]):(delimiters[2])]
@@ -167,7 +167,7 @@ renderSummary <- function(
     params = newYamlParams,
     date = format(Sys.Date()))
 
-  rmdDstFilePath <- file.path(outDir, paste0(outFileName, ".Rmd"))
+  rmdDstFilePath <- file.path(outDirPath, paste0(outFileName, ".Rmd"))
   file.copy(rmdSourceFilePath, rmdDstFilePath)
   ymlthis::use_rmarkdown(
     newYaml,

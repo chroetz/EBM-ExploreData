@@ -5,7 +5,7 @@
 \title{Render Summary}
 \usage{
 renderSummary(
-  outDir = getwd(),
+  outDirPath = getwd(),
   outFileName = "Summary",
   outFormat = "HTML",
   envir = new.env(),
@@ -15,7 +15,7 @@ renderSummary(
 )
 }
 \arguments{
-\item{outDir}{\code{character(1)}. The directory where the output document
+\item{outDirPath}{\code{character(1)}. The directory where the output document
 and intermediary files are created.}
 
 \item{outFileName}{\code{character(1)}. File name (without extension) of the
