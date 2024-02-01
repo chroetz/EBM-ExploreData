@@ -1,14 +1,15 @@
 #' @export
-showTable <- function(data, caption, digits = 3) {
+showTable <- function(data, caption, format.args = list(scientific = -1, digits = 3)) {
   if (knitr::is_latex_output()) {
     caption <- knitrEscapeLatex(caption)
   }
   data |>
     kableExtra::kbl(
       caption = caption,
-      digits = digits,
+      digits = Inf, # do not apply round()
       booktabs = TRUE,
-      align = c("l", rep("r", ncol(data)-1))
+      align = c("l", rep("r", ncol(data)-1)),
+      format.args = format.args
     ) |>
     kableExtra::kable_styling(
       bootstrap_options = c("condensed", "striped"),
