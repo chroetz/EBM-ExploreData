@@ -23,7 +23,9 @@ createMaps <- function(
 ) {
 
   # load and filter data
-  data <- read_csv(dataFilePath, col_types = cols())
+  data <-
+    read_csv(dataFilePath, col_types = cols()) |>
+    select(all_of(c(dataRegionName, dataTimeName, dataVariableName)))
   if (length(timeRange) == 2) {
     data <-
       data |>
@@ -77,7 +79,7 @@ createMaps <- function(
     read_sf() |>
     select(all_of(shapeRegionName), .data$geom)
   if (hasValue(regionRegex)) {
-    shape <- filter(shape, str_detect(.data[[dataRegionName]], regionRegex))
+    shape <- filter(shape, str_detect(.data[[shapeRegionName]], regionRegex))
   }
   cat(" done after", proc.time()[3] - pt, "s\n")
 
