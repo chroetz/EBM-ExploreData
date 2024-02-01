@@ -35,6 +35,10 @@ createVideo <- function(
   uniquePrefixes <- unique(tbl$prefix)
   cat(sprintf("Found %d files with %d unique prefixes.\n", nrow(tbl), length(uniquePrefixes)))
 
+  if (!dir.exists(outDirPath)) {
+    dir.create(outDirPath, recursive = TRUE)
+  }
+
   batch <- splitAndGetOneBatch("prefix", uniquePrefixes, nBatches, batchIndex)
 
   for (prefix in batch) {
