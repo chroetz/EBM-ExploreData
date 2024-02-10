@@ -170,7 +170,7 @@ renderSummary <- function(
 
     rmarkdown::render(
       rmdSourceFilePath,
-      intermediates_dir = outDirPath,
+      intermediates_dir = tempdir(),
       output_dir = outDirPath,
       output_file = outFileName,
       output_format = outFormat,
