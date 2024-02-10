@@ -138,6 +138,10 @@ renderSummary <- function(
     nBatches,
     batchIndex)
 
+  if (!dir.exists(outDirPath)) {
+    dir.create(outDirPath, recursive = TRUE)
+  }
+
   for (variableName in variableNames) {
 
     yamlParams$variableName <- variableName
