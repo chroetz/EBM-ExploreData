@@ -3,8 +3,9 @@
 #' Renders the the Rmd summary for a variable in a csv that has a region and a
 #' time column.
 #'
-#' @param outFileName \code{character(1)}. File name (without extension) of the
-#'   output document to be created.
+#' @param outFileNameGlue \code{character(1)}. File name (without extension) of the
+#'   output document to be created. Supports glue syntax. The following variables
+#'   are available: \code{variableName}, \code{databaseName}.
 #' @param outDirPath \code{character(1)}. The directory where the output document
 #'   and intermediary files are created.
 #' @param outFormat \code{character(1)}, not case-sensitive. \code{"html"},
@@ -109,7 +110,7 @@
 #' @export
 renderSummary <- function(
   outDirPath = getwd(),
-  outFileName = "Summary",
+  outFileNameGlue = "summary_{databaseName}_{variableName}",
   outFormat = "HTML",
   envir = new.env(),
   quiet = FALSE,
@@ -142,6 +143,13 @@ renderSummary <- function(
     yamlParams$variableName <- variableName
 
     yamlParams$documentTitle <- paste0("Summary of ", yamlParams$variableName)
+
+    databaseName <-
+      yamlParams$dataFilePath |>
+      basename() |>
+      cerUtility::removeFileNameEnding()
+
+    outFileName <- str_glue(outFileNameGlue)
 
     outFormat <- tolower(outFormat)[[1]]
     if (outFormat == "pdf") {
