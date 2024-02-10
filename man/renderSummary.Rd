@@ -11,6 +11,8 @@ renderSummary(
   envir = new.env(),
   quiet = FALSE,
   debug = FALSE,
+  nBatches = 1,
+  batchIndex = 1,
   ...
 )
 }
@@ -35,6 +37,10 @@ data in your global environment during development.}
 \item{debug}{\code{logical(1)}. Should the debug Rmd be rendered instead of
 the main one?}
 
+\item{nBatches}{\code{integer(1)}. Number of batches to split the rendering.}
+
+\item{batchIndex}{\code{integer(1)}. Index of the batch to be rendered.}
+
 \item{...}{YAML parameters, see below.}
 }
 \value{
@@ -52,8 +58,8 @@ time column.
 \code{character(1)}.
 Path to a csv file.}
 \item{\code{variableName}}{
-\code{character(1)}.
-The name of the column in the csv file \code{dataFilePath} to be shown.}
+\code{character(n)}.
+Vector of names of the columns in the csv file \code{dataFilePath} to be shown. There will be one output file per name.}
 \item{\code{regionName}}{
 \code{character(1)}.
 Default: \code{"GID_1"}.

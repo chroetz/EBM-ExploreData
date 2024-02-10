@@ -17,6 +17,8 @@
 #' @param quiet \code{logical(1)}. Suppress printing during rendering?
 #' @param debug \code{logical(1)}. Should the debug Rmd be rendered instead of
 #'   the main one?
+#' @param nBatches \code{integer(1)}. Number of batches to split the rendering.
+#' @param batchIndex \code{integer(1)}. Index of the batch to be rendered.
 #' @param ... YAML parameters, see below.
 #' @return The value returned by
 #'   \code{\link[rmarkdown:render]{rmarkdown::render()}}.
@@ -26,8 +28,8 @@
 #'     \code{character(1)}.
 #'     Path to a csv file.}
 #'   \item{\code{variableName}}{
-#'     \code{character(1)}.
-#'     The name of the column in the csv file \code{dataFilePath} to be shown.}
+#'     \code{character(n)}.
+#'     Vector of names of the columns in the csv file \code{dataFilePath} to be shown. There will be one output file per name.}
 #'   \item{\code{regionName}}{
 #'     \code{character(1)}.
 #'     Default: \code{"GID_1"}.
@@ -112,6 +114,8 @@ renderSummary <- function(
   envir = new.env(),
   quiet = FALSE,
   debug = FALSE,
+  nBatches = 1,
+  batchIndex = 1,
   ...
 ) {
   # Set yaml parameters and convert relative to absolute paths.
@@ -120,7 +124,6 @@ renderSummary <- function(
   for (path in paths) {
     yamlParams[[path]] <- normalizePath(yamlParams[[path]])
   }
-  yamlParams$documentTitle <- paste0("Summary of ", yamlParams$variableName)
 
   if (debug) {
     rmdSourceFilePath <- system.file("markdown/summary_debug.Rmd", package = "cerExploreData")
@@ -128,26 +131,41 @@ renderSummary <- function(
     rmdSourceFilePath <- system.file("markdown/summary.Rmd", package = "cerExploreData")
   }
 
-  outFormat <- tolower(outFormat)[[1]]
-  if (outFormat == "pdf") {
-    outFormat <- "pdf_document"
-  } else if (outFormat == "html") {
-    outFormat <- "html_document"
-  } else if (outFormat == "rmd") {
-    return(.summaryOfVariableRmd(yamlParams, rmdSourceFilePath, outDirPath, outFileName))
+  variableNames <- cerUtility::splitAndGetOneBatch(
+    "Variable names",
+    yamlParams$variableName,
+    nBatches,
+    batchIndex)
+
+  for (variableName in variableNames) {
+
+    yamlParams$variableName <- variableName
+
+    yamlParams$documentTitle <- paste0("Summary of ", yamlParams$variableName)
+
+    outFormat <- tolower(outFormat)[[1]]
+    if (outFormat == "pdf") {
+      outFormat <- "pdf_document"
+    } else if (outFormat == "html") {
+      outFormat <- "html_document"
+    } else if (outFormat == "rmd") {
+      return(.summaryOfVariableRmd(yamlParams, rmdSourceFilePath, outDirPath, outFileName))
+    } else {
+      stop("Unknown format: ", outFormat)
+    }
+
+    yamlParams <- expressionsToObject(yamlParams)
+
+    rmarkdown::render(
+      rmdSourceFilePath,
+      intermediates_dir = outDirPath,
+      output_dir = outDirPath,
+      output_file = outFileName,
+      output_format = outFormat,
+      params = yamlParams,
+      envir = envir,
+      quiet = quiet)
   }
-
-  yamlParams <- expressionsToObject(yamlParams)
-
-  rmarkdown::render(
-    rmdSourceFilePath,
-    intermediates_dir = outDirPath,
-    output_dir = outDirPath,
-    output_file = outFileName,
-    output_format = outFormat,
-    params = yamlParams,
-    envir = envir,
-    quiet = quiet)
 }
 
 
